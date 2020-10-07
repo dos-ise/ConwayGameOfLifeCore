@@ -9,13 +9,11 @@
     {
       LifeSimulation sim = new LifeSimulation(40);
       sim.Randomize();
-      sim.BeginGeneration();
       for (int i = 0; i < 1000; i++)
       {
-        sim.Update();
-        await sim.Wait();
+        await sim.Update();
         OutputBoard(sim);
-        await Task.Delay(500);
+        await Task.Delay(100);
       }
 
       Console.ReadKey();

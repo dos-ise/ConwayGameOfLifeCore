@@ -6,70 +6,35 @@
   public class LifeSimulation
   {
     private bool[,] world;
-    private bool[,] nextGeneration;
-    private Task processTask;
 
     public LifeSimulation(int size)
     {
       if (size < 0) throw new ArgumentOutOfRangeException("Size must be greater than zero");
       Size = size;
       world = new bool[size, size];
-      nextGeneration = new bool[size, size];
     }
 
-    public int Size { get; private set; }
-    public int Generation { get; private set; }
+    public int Size { get; }
 
-    public Action<bool[,]> NextGenerationCompleted;
+    public int Generation { get; private set; }
 
     public bool this[int x, int y]
     {
-      get { return world[x, y]; }
-      set { world[x, y] = value; }
+      get => world[x, y];
+      set => world[x, y] = value;
     }
 
-    public bool ToggleCell(int x, int y)
+    public async Task Update()
     {
-      bool currentValue = world[x, y];
-      return world[x, y] = !currentValue;
+      world = await ProcessGeneration();
+      Generation++;
     }
 
-    public void Update()
-    {
-      if (processTask != null && processTask.IsCompleted)
-      {
-        // when a generation has completed
-        // now flip the back buffer so we can start processing on the next generation
-        var flip = nextGeneration;
-        nextGeneration = world;
-        world = flip;
-        Generation++;
-
-        // begin the next generation's processing asynchronously
-        processTask = ProcessGeneration();
-
-        NextGenerationCompleted?.Invoke(world);
-      }
-    }
-
-    public void BeginGeneration()
-    {
-      if (processTask == null || (processTask != null && processTask.IsCompleted))
-      {
-        // only begin the generation if the previous process was completed
-        processTask = ProcessGeneration();
-      }
-    }
-
-    public async Task Wait()
-    {
-      await processTask;
-    }
-
-    private Task ProcessGeneration()
+    private Task<bool[,]> ProcessGeneration()
     {
       return Task.Factory.StartNew(() =>
         {
+          bool[,] nextGeneration = new bool[Size, Size];
           Parallel.For(0, Size, x =>
             {
               Parallel.For(0, Size, y =>
@@ -90,7 +55,7 @@
                   {
                     shouldLive = true;
                   }
-                  else if (!isAlive && numberOfNeighbors == 3) // zombification
+                  else if (!isAlive && numberOfNeighbors == 3) //zombification
                   {
                     shouldLive = true;
                   }
@@ -99,6 +64,8 @@
 
                 });
             });
+
+          return nextGeneration;
         });
     }
 
