@@ -19,12 +19,7 @@
                                                                       (0, -1),
                                                                       (-1, -1),
                                                                     };
-    public LifeSimulation(int size)
-    {
-      if (size < 0) throw new ArgumentOutOfRangeException("Size must be greater than zero");
-      Size = size;
-      world = new bool[size, size];
-    }
+    public LifeSimulation(int size) => Size = size;
 
     public int Size { get; }
 
@@ -89,6 +84,7 @@
     public void Randomize()
     {
       var random = new Random();
+      world = new bool[Size, Size];
       for (int x = 0; x < Size; x++)
       {
         for (int y = 0; y < Size; y++)
