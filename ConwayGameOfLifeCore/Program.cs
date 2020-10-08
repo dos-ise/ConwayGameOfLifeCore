@@ -12,26 +12,31 @@
       for (int i = 0; i < 1000; i++)
       {
         await sim.Update();
-        OutputBoard(sim);
+        await OutputBoard(sim);
         await Task.Delay(100);
       }
 
       Console.ReadKey();
     }
 
-    private static void OutputBoard(LifeSimulation sim)
+    private static async Task OutputBoard(LifeSimulation sim)
     {
       var alive = (name: "1", color: ConsoleColor.Red);
       var dead = (name: "0", color: ConsoleColor.White);
-      for (int y = 0; y < sim.Size; y++)
-      {
-        for (int x = 0; x < sim.Size; x++)
-        {
-          Console.SetCursorPosition(x, y);
-          Console.ForegroundColor = sim[x, y] ? alive.color : dead.color;
-          Console.Write(sim[x, y] ? alive.name : dead.name);
-        }
-      }
+
+      await Task.Run(
+        () =>
+          {
+            for (int y = 0; y < sim.Size; y++)
+            {
+              for (int x = 0; x < sim.Size; x++)
+              {
+                Console.SetCursorPosition(x, y);
+                Console.ForegroundColor = sim[x, y] ? alive.color : dead.color;
+                Console.Write(sim[x, y] ? alive.name : dead.name);
+              }
+            }
+          });
     }
   }
 }
