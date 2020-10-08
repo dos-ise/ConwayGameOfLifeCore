@@ -2,12 +2,23 @@
 {
   using System;
   using System.Collections.Generic;
+  using System.Linq;
   using System.Threading.Tasks;
 
   public class LifeSimulation
   {
     private bool[,] world;
-    
+    private readonly List<(int offsetx, int offsety)> neighbors = new List<(int offsetx, int offsety)>()
+                                                                    {
+                                                                      (-1, 0),
+                                                                      (-1, 1),
+                                                                      (0, 1),
+                                                                      (1, 1),
+                                                                      (1, 0),
+                                                                      (1, -1),
+                                                                      (0, -1),
+                                                                      (-1, -1),
+                                                                    };
     public LifeSimulation(int size)
     {
       if (size < 0) throw new ArgumentOutOfRangeException("Size must be greater than zero");
@@ -52,14 +63,12 @@
           await Task.Run(
             () =>
               {
-                int numberOfNeighbors = IsNeighborAlive(world, Size, x, y, -1, 0)
-                                        + IsNeighborAlive(world, Size, x, y, -1, 1)
-                                        + IsNeighborAlive(world, Size, x, y, 0, 1)
-                                        + IsNeighborAlive(world, Size, x, y, 1, 1)
-                                        + IsNeighborAlive(world, Size, x, y, 1, 0)
-                                        + IsNeighborAlive(world, Size, x, y, 1, -1)
-                                        + IsNeighborAlive(world, Size, x, y, 0, -1)
-                                        + IsNeighborAlive(world, Size, x, y, -1, -1);
+                int numberOfNeighbors = 0;
+                foreach (var n in neighbors.Select(tuple => (x: tuple.offsetx + x, y: tuple.offsety + y)))
+                {
+                  numberOfNeighbors += IsNeighborAlive(n.x, n.y);
+                }
+
                 bool isAlive = world[x, y];
 
                 if (isAlive && (numberOfNeighbors == 2 || numberOfNeighbors == 3))
@@ -77,18 +86,10 @@
       }
     }
 
-    private static int IsNeighborAlive(bool[,] world, int size, int x, int y, int offsetx, int offsety)
+    private int IsNeighborAlive(int neighborX, int neighborY)
     {
-      int result = 0;
-
-      int proposedOffsetX = x + offsetx;
-      int proposedOffsetY = y + offsety;
-      bool outOfBounds = proposedOffsetX < 0 || proposedOffsetX >= size | proposedOffsetY < 0 || proposedOffsetY >= size;
-      if (!outOfBounds)
-      {
-        result = world[x + offsetx, y + offsety] ? 1 : 0;
-      }
-      return result;
+      bool outOfBounds = neighborX < 0 || neighborX >= Size | neighborY < 0 || neighborY >= Size;
+      return Convert.ToInt32(!outOfBounds && world[neighborX, neighborY]);
     }
 
     public void Randomize()
