@@ -1,4 +1,4 @@
-﻿namespace ConwayGameOfLifeCore
+namespace ConwayGameOfLifeCore
 {
   using System;
   using System.Threading.Tasks;
@@ -7,7 +7,7 @@
   {
     static async Task Main(string[] args)
     {
-      LifeSimulation sim = new LifeSimulation(40);
+      LifeSimulation sim = new LifeSimulation(40, 20);
       sim.Randomize();
       for (int i = 0; i < 1000; i++)
       {
@@ -27,9 +27,9 @@
       await Task.Run(
         () =>
           {
-            for (int y = 0; y < sim.Size; y++)
+            for (int y = 0; y < sim.SizeY; y++)
             {
-              for (int x = 0; x < sim.Size; x++)
+              for (int x = 0; x < sim.SizeX; x++)
               {
                 Console.SetCursorPosition(x, y);
                 Console.ForegroundColor = sim[x, y] ? alive.color : dead.color;
